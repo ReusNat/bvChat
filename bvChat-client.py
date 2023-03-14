@@ -18,9 +18,11 @@ confirm = clientSock.recv(1).decode()
 if confirm == '1':
    #password
    print('1')
+   clientSock.send( (input('New Password: ') + '\n').endcode())
 elif confirm == '0':
     #new password
     print('0')
+    clientSock.send((input('Password: ') + '\n').encode())
 else:
     #bad
     print('bad')
