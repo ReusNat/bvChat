@@ -17,12 +17,15 @@ clientSock.send((userName + '\n').encode())
 confirm = clientSock.recv(1).decode()
 if confirm == '1':
    #password
-   print('1')
-   clientSock.send( (input('New Password: ') + '\n').endcode())
+   clientSock.send( (input('Password: ') + '\n').encode())
+   passCheck = clientSock.recv(1).decode()
+   if passCheck == '0':
+       exit('Wrong password, try again')
 elif confirm == '0':
     #new password
-    print('0')
-    clientSock.send((input('Password: ') + '\n').encode())
+    clientSock.send((input('New Password: ') + '\n').encode())
+elif confirm == '3':
+    exit(f'{userName} already connected')
 else:
     #bad
     print('bad')

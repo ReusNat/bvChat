@@ -27,7 +27,10 @@ if not os.path.isfile(userFile):
     open(userFile, 'w').write('')    
 
 users = open(userFile, 'r').read().split('\n')
+users = users[:len(users)-1]
 userDict = {}
+connectedUsers = []
+
 if users != '':
     for user in users:
         userLi = user.split(':')
@@ -36,10 +39,16 @@ if users != '':
         userDict.update( { uName : uPass } )
 
 #print(userDict)
-
-if clientUN in str(users):
+if clientUN in str(connectedUsers):
+    clientConn.send('3'.encode())
+elif clientUN in str(users):
     clientConn.send('1'.encode())
     uPassword = getLine(clientConn).rstrip()
+    if uPassword != userDict[clientUN]:
+        clientConn.send('0'.encode())
+    else:
+        connectedUsers.append(clientUN)
+        clientConn.send('1'.encode())
 else:
     clientConn.send('0'.encode())
     uPassword = getLine(clientConn).rstrip()
