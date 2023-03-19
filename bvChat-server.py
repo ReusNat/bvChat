@@ -1,5 +1,6 @@
 from socket import *
 import os.path
+import threading
 
 def getLine(conn):
     msg = b''
@@ -15,13 +16,11 @@ userFile = 'users.txt'
 port = 42424
 serverSock = socket(AF_INET, SOCK_STREAM)
 serverSock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-
 serverSock.bind( ('',port) )
-serverSock.listen()
+serverSock.listen(15) # Maximum of 15 chatters at once
+
 print(f'Running on {port}')
 
-clientConn, clientAddr = serverSock.accept()
-clientUN = getLine(clientConn).rstrip()
 
 if not os.path.isfile(userFile):
     open(userFile, 'w').write('')    
@@ -31,6 +30,8 @@ users = users[:len(users)-1]
 userDict = {}
 connectedUsers = []
 
+commands = ['/who', '/exit', '/tell <username> <text>', '/motd', '/me', '/help']
+
 if users != '':
     for user in users:
         userLi = user.split(':')
@@ -38,22 +39,61 @@ if users != '':
         uPass = userLi[1]
         userDict.update( { uName : uPass } )
 
-#print(userDict)
-if clientUN in str(connectedUsers):
-    clientConn.send('3'.encode())
-elif clientUN in str(users):
-    clientConn.send('1'.encode())
-    uPassword = getLine(clientConn).rstrip()
-    if uPassword != userDict[clientUN]:
-        clientConn.send('0'.encode())
-    else:
-        connectedUsers.append(clientUN)
-        clientConn.send('1'.encode())
-else:
-    clientConn.send('0'.encode())
-    uPassword = getLine(clientConn).rstrip()
-    with open(userFile, 'a') as f:
-        f.write(clientUN + ':' + uPassword + '\n')
+def handleClient(connInfo):
+    global userDict, connectedUsers
+    clientConn, clientAddr = connInfo 
+    clientUN = getLine(clientConn).rstrip()
 
+    if clientUN in str(connectedUsers):
+        # user already connected
+        clientConn.send('2'.encode())
+    elif clientUN in str(users):
+        # user exists
+        clientConn.send('1'.encode())
+        uPassword = getLine(clientConn).rstrip()
+        print(uPassword)
+        if uPassword != userDict[clientUN]:
+            # wrong password
+            clientConn.send('0'.encode())
+        else:
+            clientConn.send('1'.encode())
+            connectedUsers.append(clientUN)
+    else:
+        clientConn.send('0'.encode())
+        uPassword = getLine(clientConn).rstrip()
+        connectedUsers.append(clientUN)
+        users.append(clientUN)
+        userDict.update( {clientUN : uPassword} )
+        with open(userFile, 'a') as f:
+            f.write(clientUN + ':' + uPassword + '\n')
+    
+
+    try:
+        clientConnected = True
+        while clientConnected:
+            message = getLine(clientConn).rstrip()
+            if message != '':
+                print(message)
+                if message in str(commands):
+                    if message == '/exit':
+                        clientConnected = False
+
+
+    except Exception:
+        print('Exception occurred, closing connection')
+
+    clientConn.close()
+    print(connectedUsers)
+    connectedUsers.remove(clientUN)
+    print(connectedUsers)
+
+
+running = True
+while running:
+    try:
+        threading.Thread(target=handleClient, args=(serverSock.accept(),), daemon=True).start()
+    except KeyboardInterrupt:
+        print('\n[Shutting down]')
+        running = False
 
 serverSock.close()
