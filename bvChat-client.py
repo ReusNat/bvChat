@@ -15,16 +15,35 @@ userName = input('Username: ')
 clientSock.send((userName + '\n').encode())
 
 confirm = clientSock.recv(1).decode()
+
 if confirm == '1':
    #password
-   print('1')
+   clientSock.send( (input('Password: ') + '\n').encode())
+   passCheck = clientSock.recv(1).decode()
+   if passCheck == '0':
+       exit('Wrong password, try again')
 elif confirm == '0':
     #new password
-    print('0')
+    clientSock.send((input('New Password: ') + '\n').encode())
+elif confirm == '2':
+    exit(f'{userName} already connected')
 else:
     #bad
     print('bad')
 
+try:
+    connected = True
+    while connected:
+        message = input('> ')
+        clientSock.send( (message + '\n').encode() )
+        if message == '/exit':
+            clientSock.close()
+            connected = False
+
+except Exception:
+    print('Exception happened, closing connection')
+    clientSock.close()
+    
+
 commands = ['/who', '/exit', '/tell <username> <text>', '/motd', '/me', '/help']
 
-clientSock.close()
