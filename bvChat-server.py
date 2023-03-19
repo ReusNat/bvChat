@@ -84,9 +84,7 @@ def handleClient(connInfo):
         print('Exception occurred, closing connection')
 
     clientConn.close()
-    print(connectedUsers)
     connectedUsers.remove(clientUN)
-    print(connectedUsers)
 
 
 running = True
