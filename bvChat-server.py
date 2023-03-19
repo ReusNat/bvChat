@@ -43,6 +43,7 @@ def handleClient(connInfo):
     global userDict, connectedUsers
     clientConn, clientAddr = connInfo 
     clientUN = getLine(clientConn).rstrip()
+    print(clientAddr)
 
     if clientUN in str(connectedUsers):
         # user already connected
@@ -57,7 +58,7 @@ def handleClient(connInfo):
             clientConn.send('0'.encode())
         else:
             clientConn.send('1'.encode())
-            connectedUsers.append(clientUN)
+            connectedUsers.append( clientUN )
     else:
         clientConn.send('0'.encode())
         uPassword = getLine(clientConn).rstrip()
