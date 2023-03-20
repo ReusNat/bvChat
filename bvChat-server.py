@@ -1,6 +1,8 @@
 from socket import *
 import os.path
 import threading
+#random is used to choose motd
+import random
 
 def getLine(conn):
     msg = b''
@@ -30,7 +32,11 @@ users = users[:len(users)-1]
 userDict = {}
 connectedUsers = []
 
+#moved to be visible by handleClient function
 commands = ['/who', '/exit', '/tell <username> <text>', '/motd', '/me', '/help']
+
+#only want to get it once per "day" (session)
+motd = random.choice(open("motd.txt").read().splitlines())
 
 if users != '':
     for user in users:
@@ -71,6 +77,7 @@ def handleClient(connInfo):
 
     try:
         clientConnected = True
+        clientConn.send(motd.encode())
         while clientConnected:
             message = getLine(clientConn).rstrip()
             if message != '':
@@ -78,6 +85,14 @@ def handleClient(connInfo):
                 if message in str(commands):
                     if message == '/exit':
                         clientConnected = False
+                    if message == '/who':
+                        clientConn.send(str(connectedUsers).encode())
+                    if message == '/motd':
+                        clientConn.send(motd.encode())
+                    #if '/tell' in message:
+
+                    #if '/me' in message:
+
 
 
     except Exception:
