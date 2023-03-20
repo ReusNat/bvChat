@@ -13,7 +13,7 @@ def getLine(conn):
 
 userFile = 'users.txt'
 
-port = 42424
+port = 55553
 serverSock = socket(AF_INET, SOCK_STREAM)
 serverSock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 serverSock.bind( ('',port) )
@@ -43,7 +43,6 @@ def handleClient(connInfo):
     global userDict, connectedUsers
     clientConn, clientAddr = connInfo 
     clientUN = getLine(clientConn).rstrip()
-    print(clientAddr)
 
     if clientUN in str(connectedUsers):
         # user already connected
@@ -58,11 +57,11 @@ def handleClient(connInfo):
             clientConn.send('0'.encode())
         else:
             clientConn.send('1'.encode())
-            connectedUsers.append( clientUN )
+            connectedUsers.append( (clientUN, connInfo) )
     else:
         clientConn.send('0'.encode())
         uPassword = getLine(clientConn).rstrip()
-        connectedUsers.append(clientUN)
+        connectedUsers.append( (clientUN, connInfo) )
         users.append(clientUN)
         userDict.update( {clientUN : uPassword} )
         with open(userFile, 'a') as f:
@@ -74,17 +73,23 @@ def handleClient(connInfo):
         while clientConnected:
             message = getLine(clientConn).rstrip()
             if message != '':
-                print(message)
                 if message in str(commands):
                     if message == '/exit':
                         clientConnected = False
+                        message = f'{clientUN} has left the chat'
+                else:
+                    message = clientUN + ': ' + message + '\n'
+                    print(message)
+                    for i in range(0, len(connectedUsers)):
+                        conn = connectedUsers[i][1][0]
+                        conn.send(message.encode())
 
 
     except Exception:
         print('Exception occurred, closing connection')
 
     clientConn.close()
-    connectedUsers.remove(clientUN)
+    connectedUsers.remove( (clientUN, connInfo) )
 
 
 running = True
