@@ -54,16 +54,27 @@ else:
 try:
     connected = True
     threading.Thread(target=messageRecvr, daemon=True).start()
+    motd = clientSock.recv(1024).decode()
+    print("Message of the day:\n"+motd)
     while connected:
         message = input('> ')
         clientSock.send( (message + '\n').encode() )
         if message == '/exit':
             clientSock.close()
             connected = False
+        if message == '/help':
+            print("Valid commands: ")
+            print(commands)
+        if message == '/who':
+            msg = clientSock.recv(1024).decode()
+            print(msg)
+        if message == '/motd':
+            msg = clientSock.recv(1024).decode()
+            print(msg)
+        #if '/me' in message:
+            
+        #if '/tell' in message:
 
 except Exception:
     print('Exception happened, closing connection')
     clientSock.close()
-    
-
-
