@@ -1,10 +1,23 @@
 from socket import *
 from sys import argv as a
+import threading
 
 if len(a) < 3:
     exit('Not enough arguments\nUsage: python3 bvChat-client.py <serverIP> <serverPort>')
 elif len(a) > 3:
     exit('Too many arguments\nUsage: python3 bvChat-client.py <serverIP> <serverPort>')
+
+commands = ['/who', '/exit', '/tell <username> <text>', '/motd', '/me', '/help']
+
+
+def getLine(conn):
+    msg = b''
+    while True:
+        ch = conn.recv(1)
+        msg += ch
+        if ch == b'\n' or len(ch) == 0:
+            break
+    return msg.decode()
 
 serverIP = a[1]
 serverPort = int(a[2])
@@ -16,7 +29,12 @@ clientSock.send((userName + '\n').encode())
 
 confirm = clientSock.recv(1).decode()
 
-commands = ['/who', '/exit', '/tell <username> <text>', '/motd', '/me', '/help']
+def messageRecvr():
+    global connected
+    while connected:
+        message = getLine(clientSock).rstrip()
+        if message != '':
+            print(message)
 
 if confirm == '1':
    #password
@@ -35,6 +53,7 @@ else:
 
 try:
     connected = True
+    threading.Thread(target=messageRecvr, daemon=True).start()
     motd = clientSock.recv(1024).decode()
     print("Message of the day:\n"+motd)
     while connected:
