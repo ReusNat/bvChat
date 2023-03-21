@@ -53,7 +53,7 @@ try:
             msg = clientSock.recv(1024).decode()
             print(msg)
         #if '/me' in message:
-
+            
         #if '/tell' in message:
 
 except Exception:

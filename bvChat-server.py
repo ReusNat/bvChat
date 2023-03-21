@@ -89,8 +89,12 @@ def handleClient(connInfo):
                         clientConn.send(str(connectedUsers).encode())
                     if message == '/motd':
                         clientConn.send(motd.encode())
-                    #if '/tell' in message:
-
+                else:
+                    if '/tell' in message:
+                        msgs = message.split()
+                        tousr = msgs[1]
+                        msg = " ".join(msgs[2:])
+                        print(clientUN + "whispers: " +msg)
                     #if '/me' in message:
 
 
