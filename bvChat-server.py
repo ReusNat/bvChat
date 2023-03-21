@@ -77,6 +77,10 @@ def handleClient(connInfo):
                     if message == '/exit':
                         clientConnected = False
                         message = f'{clientUN} has left the chat'
+                        print('A USER DISSCONNECTED!')
+                        for i in range(0, len(connectedUsers)):
+                            conn = connectedUsers[i][1][0]
+                            conn.send(message.encode())
                 else:
                     message = clientUN + ': ' + message + '\n'
                     print(message)
