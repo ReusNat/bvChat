@@ -65,15 +65,9 @@ try:
         if message == '/help':
             print("Valid commands: ")
             print(commands)
-        if message == '/who':
-            msg = clientSock.recv(1024).decode()
-            print(msg)
-        if message == '/motd':
-            msg = clientSock.recv(1024).decode()
-            print(msg)
-        #if '/me' in message:
-            
-        #if '/tell' in message:
+        #check for messages
+        msg = clientSock.recv(1024).decode()
+        print(msg)
 
 except Exception:
     print('Exception happened, closing connection')

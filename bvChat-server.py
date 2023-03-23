@@ -88,22 +88,45 @@ def handleClient(connInfo):
                         for i in range(0, len(connectedUsers)):
                             conn = connectedUsers[i][1][0]
                             conn.send(message.encode())
-                else:
                     if message == '/who':
-                        clientConn.send(str(connectedUsers).encode())
+                        us = []
+                        for i in connectedUsers:
+                            us.append(i[0])
+                            msg = ", ".join(us)
+                            clientConn.send(msg.encode())
                     if message == '/motd':
                         clientConn.send(motd.encode())
+                else:
                     if '/tell' in message:
                         msgs = message.split()
-                        tousr = msgs[1]
-                        msg = " ".join(msgs[2:])
-                        print(clientUN + "whispers: " +msg)
-                    #if '/me' in message:
-                    message = clientUN + ': ' + message + '\n'
+                        del msgs[0]
+                        tousr = msgs[0]
+                        del msgs[0]
+                        msg = " ".join(msgs)
+                        msg = clientUN + " whispers: " +msg + "\n"
+                        for i in range(0, len(connectedUsers)):
+                            if tousr == connectedUsers[i][0]:
+                                conn = connectedUsers[i][1][0]
+                                conn.send(msg.encode())
+
+                        #TODO:
+                        #if user in users and user not in connectedusers:
+                        #   hold message till they connect
+                        #if user in connectedusers:
+                        #   whipser message
+                    elif '/me' in message:
+                        msgs = message.split()
+                        del msgs[0]
+                        me = clientUN
+                        msg = " ".join(msgs)
+                        message = "* "+ me + " " + msg
+                    else:
+                        message = clientUN + ': ' + message + '\n'
                     print(message)
-                    for i in range(0, len(connectedUsers)):
-                        conn = connectedUsers[i][1][0]
-                        conn.send(message.encode())
+                    if not "/tell" in message:
+                        for i in range(0, len(connectedUsers)):
+                            conn = connectedUsers[i][1][0]
+                            conn.send(message.encode())
 
     except Exception:
         print('Exception occurred, closing connection')
