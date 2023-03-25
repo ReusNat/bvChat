@@ -60,6 +60,7 @@ def handleClient(connInfo):
         elif connAttemps[clientUN][1] and connAttemps[clientUN][0][0] < int(time()):
             connAttemps[clientUN][0] = []
             connAttemps[clientUN][1] = False
+
     if clientConnected:
         if clientUN in str(connectedUsers):
             # user already connected
