@@ -41,12 +41,20 @@ if confirm == '1':
    clientSock.send( (input('Password: ') + '\n').encode())
    passCheck = clientSock.recv(1).decode()
    if passCheck == '0':
+       clientSock.close()
        exit('Wrong password, try again')
+   elif passCheck == '2':
+       clientSock.close()
+       exit('Too many attempts, account locked for 2 minutes')
 elif confirm == '0':
     #new password
     clientSock.send((input('New Password: ') + '\n').encode())
 elif confirm == '2':
+    clientSock.close()
     exit(f'{userName} already connected')
+elif confirm == '3':
+    clientSock.close()
+    exit('Nice try buddy, wait some more')
 else:
     #bad
     print('bad')
