@@ -31,6 +31,7 @@ users = open(userFile, 'r').read().split('\n')
 users = users[:len(users)-1]
 userDict = {}
 connectedUsers = []
+offlineMessages = {}
 
 #moved to be visible by handleClient function
 commands = ['/who', '/exit', '/tell <username> <text>', '/motd', '/me', '/help']
@@ -108,12 +109,19 @@ def handleClient(connInfo):
                             if tousr == connectedUsers[i][0]:
                                 conn = connectedUsers[i][1][0]
                                 conn.send(msg.encode())
-
-                        #TODO:
-                        #if user in users and user not in connectedusers:
-                        #   hold message till they connect
-                        #if user in connectedusers:
-                        #   whipser message
+                        print(users)
+                        print(connectedUsers)
+                        print(tousr)
+                        msglist = []
+                        msglist.append(msg)
+                        for i in range(0, len(users)):
+                            if tousr in users and tousr not in connectedUsers[i]:
+                                if tousr not in offlinemessage[0]:
+                                    offlineMessages.update( {'tousr':msglist})
+                                #else:
+                                #    find user and append message
+                        print(offlineMessages)
+                            
                     elif '/me' in message:
                         msgs = message.split()
                         del msgs[0]
@@ -128,7 +136,7 @@ def handleClient(connInfo):
                             conn = connectedUsers[i][1][0]
                             conn.send(message.encode())
 
-    except Exception:
+    except KeyboardInterrupt:
         print('Exception occurred, closing connection')
 
     clientConn.close()
