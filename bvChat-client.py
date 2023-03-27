@@ -47,8 +47,8 @@ if confirm == '1':
        clientSock.close()
        exit('Too many attempts, account locked for 2 minutes')
 elif confirm == '0':
-    #new password
-    clientSock.send((input('New Password: ') + '\n').encode())
+        #new password
+        clientSock.send((input('New Password: ') + '\n').encode())
 elif confirm == '2':
     clientSock.close()
     exit(f'{userName} already connected')
@@ -69,7 +69,6 @@ try:
         clientSock.send( (message + '\n').encode() )
         if message == '/exit':
             clientSock.close()
-            connected = False
         if message == '/help':
             print("Valid commands: ")
             print(commands)

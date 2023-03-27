@@ -80,9 +80,12 @@ def handleClient(connInfo):
                     timeList = [int(time())]
 
                 if clientUN in connAttemps and len(connAttemps[clientUN][0]) == 3:
-                    connAttemps[clientUN][1] = True
-                    connAttemps[clientUN][0] = [int(time()) + 120]
-                    clientConn.send('2'.encode())
+                    if connAttemps[clientUN][0][2] - connAttemps[clientUN][0][0] < 30:
+                        connAttemps[clientUN][1] = True
+                        connAttemps[clientUN][0] = [int(time()) + 120]
+                        clientConn.send('2'.encode())
+                    else:
+                        connAttemps[clientUN][0] = [int(time())]
                 else:
                     connAttemps.update( {clientUN : [timeList, False]} )
                     clientConn.send('0'.encode())
