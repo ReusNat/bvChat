@@ -15,7 +15,7 @@ def getLine(conn):
 
 userFile = 'users.txt'
 
-port = 55553
+port = 55552
 serverSock = socket(AF_INET, SOCK_STREAM)
 serverSock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 serverSock.bind( ('',port) )
@@ -114,10 +114,13 @@ def handleClient(connInfo):
                         #print(tousr)
                         msglist = []
                         msglist.append(msg)
-                        print(msglist)
-                        for i in range(0, len(users)):
-                            if tousr in users and tousr not in connectedUsers[i]:
-                                offlineMessages.update( {tousr : msglist})
+                        if tousr in str(users) and tousr not in str(connectedUsers):
+                            if tousr not in str(offlineMessages):
+                                offlineMessages[tousr] = msglist
+                            else:
+                                msglist.append(offlineMessages[tousr])
+                                offlineMesageses[tousr] = msglist
+                                
                                 #else:
                                 #    find user and append message
                         print(offlineMessages)
