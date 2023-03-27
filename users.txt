@@ -1,6 +1,2 @@
-kat:test
-test1:test
-test2:test
-Reusnat:1234
-Resunat2:1234
+test:t
 reusnat:1234

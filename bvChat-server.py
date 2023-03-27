@@ -109,15 +109,15 @@ def handleClient(connInfo):
                             if tousr == connectedUsers[i][0]:
                                 conn = connectedUsers[i][1][0]
                                 conn.send(msg.encode())
-                        print(users)
-                        print(connectedUsers)
-                        print(tousr)
+                        #print(users)
+                        #print(connectedUsers)
+                        #print(tousr)
                         msglist = []
                         msglist.append(msg)
+                        print(msglist)
                         for i in range(0, len(users)):
                             if tousr in users and tousr not in connectedUsers[i]:
-                                if tousr not in offlinemessage[0]:
-                                    offlineMessages.update( {'tousr':msglist})
+                                offlineMessages.update( {tousr : msglist})
                                 #else:
                                 #    find user and append message
                         print(offlineMessages)
