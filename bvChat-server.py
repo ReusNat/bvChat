@@ -78,6 +78,9 @@ def handleClient(connInfo):
     try:
         clientConnected = True
         clientConn.send(motd.encode())
+        if clientUN in offlineMessages:
+            for message in offlineMessages[clientUN]:
+                clientConn.send(message)
         while clientConnected:
             message = getLine(clientConn).rstrip()
             if message != '':
@@ -109,9 +112,6 @@ def handleClient(connInfo):
                             if tousr == connectedUsers[i][0]:
                                 conn = connectedUsers[i][1][0]
                                 conn.send(msg.encode())
-                        #print(users)
-                        #print(connectedUsers)
-                        #print(tousr)
                         msglist = []
                         msglist.append(msg)
                         if tousr in str(users) and tousr not in str(connectedUsers):
@@ -120,9 +120,6 @@ def handleClient(connInfo):
                             else:
                                 msglist.append(offlineMessages[tousr])
                                 offlineMesageses[tousr] = msglist
-                                
-                                #else:
-                                #    find user and append message
                         print(offlineMessages)
                             
                     elif '/me' in message:
