@@ -15,7 +15,7 @@ def getLine(conn):
 
 userFile = 'users.txt'
 
-port = 55553
+port = 55552
 serverSock = socket(AF_INET, SOCK_STREAM)
 serverSock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 serverSock.bind( ('',port) )
@@ -31,6 +31,7 @@ users = open(userFile, 'r').read().split('\n')
 users = users[:len(users)-1]
 userDict = {}
 connectedUsers = []
+offlineMessages = {}
 
 connAttemps = {'initUsr' : [[], False]}
 
@@ -107,6 +108,11 @@ def handleClient(connInfo):
     try:
         if clientConnected:
             clientConn.send(motd.encode())
+            
+        if clientUN in offlineMessages and clientConnected:
+            for message in offlineMessages[clientUN]:
+                clientConn.send(message)
+                
         while clientConnected:
             message = getLine(clientConn).rstrip()
             if message != '':
@@ -139,12 +145,16 @@ def handleClient(connInfo):
                             if tousr == connectedUsers[i][0]:
                                 conn = connectedUsers[i][1][0]
                                 conn.send(msg.encode())
-
-                        #TODO:
-                        #if user in users and user not in connectedusers:
-                        #   hold message till they connect
-                        #if user in connectedusers:
-                        #   whipser message
+                        msglist = []
+                        msglist.append(msg)
+                        if tousr in str(users) and tousr not in str(connectedUsers):
+                            if tousr not in str(offlineMessages):
+                                offlineMessages[tousr] = msglist
+                            else:
+                                msglist.append(offlineMessages[tousr])
+                                offlineMesageses[tousr] = msglist
+                        print(offlineMessages)
+                            
                     elif '/me' in message:
                         msgs = message.split()
                         del msgs[0]
@@ -159,7 +169,7 @@ def handleClient(connInfo):
                             conn = connectedUsers[i][1][0]
                             conn.send(message.encode())
 
-    except Exception:
+    except KeyboardInterrupt:
         print('Exception occurred, closing connection')
 
     clientConn.close()
