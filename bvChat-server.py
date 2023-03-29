@@ -111,7 +111,7 @@ def handleClient(connInfo):
             
         if clientUN in offlineMessages and clientConnected:
             for message in offlineMessages[clientUN]:
-                clientConn.send(message)
+                clientConn.send(message.encode())
                 
         while clientConnected:
             message = getLine(clientConn).rstrip()
