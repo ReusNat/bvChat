@@ -1,6 +1,8 @@
 from socket import *
 import os.path
 import threading
+#random is used to choose motd
+import random
 
 def getLine(conn):
     msg = b''
@@ -13,7 +15,7 @@ def getLine(conn):
 
 userFile = 'users.txt'
 
-port = 42424
+port = 55552
 serverSock = socket(AF_INET, SOCK_STREAM)
 serverSock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 serverSock.bind( ('',port) )
@@ -29,8 +31,13 @@ users = open(userFile, 'r').read().split('\n')
 users = users[:len(users)-1]
 userDict = {}
 connectedUsers = []
+offlineMessages = {}
 
+#moved to be visible by handleClient function
 commands = ['/who', '/exit', '/tell <username> <text>', '/motd', '/me', '/help']
+
+#only want to get it once per "day" (session)
+motd = random.choice(open("motd.txt").read().splitlines())
 
 if users != '':
     for user in users:
@@ -43,7 +50,6 @@ def handleClient(connInfo):
     global userDict, connectedUsers
     clientConn, clientAddr = connInfo 
     clientUN = getLine(clientConn).rstrip()
-    print(clientAddr)
 
     if clientUN in str(connectedUsers):
         # user already connected
@@ -58,11 +64,11 @@ def handleClient(connInfo):
             clientConn.send('0'.encode())
         else:
             clientConn.send('1'.encode())
-            connectedUsers.append( clientUN )
+            connectedUsers.append( (clientUN, connInfo) )
     else:
         clientConn.send('0'.encode())
         uPassword = getLine(clientConn).rstrip()
-        connectedUsers.append(clientUN)
+        connectedUsers.append( (clientUN, connInfo) )
         users.append(clientUN)
         userDict.update( {clientUN : uPassword} )
         with open(userFile, 'a') as f:
@@ -71,22 +77,70 @@ def handleClient(connInfo):
 
     try:
         clientConnected = True
+        clientConn.send(motd.encode())
+        if clientUN in offlineMessages:
+            for message in offlineMessages[clientUN]:
+                clientConn.send(message)
         while clientConnected:
             message = getLine(clientConn).rstrip()
             if message != '':
-                print(message)
                 if message in str(commands):
                     if message == '/exit':
                         clientConnected = False
+                        message = f'{clientUN} has left the chat'
+                        print('A USER DISSCONNECTED!')
+                        for i in range(0, len(connectedUsers)):
+                            conn = connectedUsers[i][1][0]
+                            conn.send(message.encode())
+                    if message == '/who':
+                        us = []
+                        for i in connectedUsers:
+                            us.append(i[0])
+                            msg = ", ".join(us)
+                            clientConn.send(msg.encode())
+                    if message == '/motd':
+                        clientConn.send(motd.encode())
+                else:
+                    if '/tell' in message:
+                        msgs = message.split()
+                        del msgs[0]
+                        tousr = msgs[0]
+                        del msgs[0]
+                        msg = " ".join(msgs)
+                        msg = clientUN + " whispers: " +msg + "\n"
+                        for i in range(0, len(connectedUsers)):
+                            if tousr == connectedUsers[i][0]:
+                                conn = connectedUsers[i][1][0]
+                                conn.send(msg.encode())
+                        msglist = []
+                        msglist.append(msg)
+                        if tousr in str(users) and tousr not in str(connectedUsers):
+                            if tousr not in str(offlineMessages):
+                                offlineMessages[tousr] = msglist
+                            else:
+                                msglist.append(offlineMessages[tousr])
+                                offlineMesageses[tousr] = msglist
+                        print(offlineMessages)
+                            
+                    elif '/me' in message:
+                        msgs = message.split()
+                        del msgs[0]
+                        me = clientUN
+                        msg = " ".join(msgs)
+                        message = "* "+ me + " " + msg
+                    else:
+                        message = clientUN + ': ' + message + '\n'
+                    print(message)
+                    if not "/tell" in message:
+                        for i in range(0, len(connectedUsers)):
+                            conn = connectedUsers[i][1][0]
+                            conn.send(message.encode())
 
-
-    except Exception:
+    except KeyboardInterrupt:
         print('Exception occurred, closing connection')
 
     clientConn.close()
-    print(connectedUsers)
-    connectedUsers.remove(clientUN)
-    print(connectedUsers)
+    connectedUsers.remove( (clientUN, connInfo) )
 
 
 running = True
