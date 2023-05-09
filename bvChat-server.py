@@ -39,7 +39,7 @@ connAttemps = {'initUsr' : [[], False]}
 commands = ['/who', '/exit', '/tell <username> <text>', '/motd', '/me', '/help']
 
 #only want to get it once per "day" (session)
-motd = random.choice(open("motd.txt").read().splitlines())
+motd = random.choice(open("motd.txt").read().splitlines()) + '\n'
 
 if users != '':
     for user in users:
@@ -119,17 +119,15 @@ def handleClient(connInfo):
                 if message in str(commands):
                     if message == '/exit':
                         clientConnected = False
-                        message = f'{clientUN} has left the chat'
+                        message = f'{clientUN} has left the chat\n'
                         print('A USER DISSCONNECTED!')
                         connectedUsers.remove( (clientUN, connInfo) )
                         for i in range(0, len(connectedUsers)):
                             conn = connectedUsers[i][1][0]
                             conn.send(message.encode())
                     if message == '/who':
-                        us = []
-                        for i in connectedUsers:
-                            us.append(i[0])
-                            msg = ", ".join(us)
+                        for usr in connectedUsers:
+                            msg = usr[0] + '\n'
                             clientConn.send(msg.encode())
                     if message == '/motd':
                         clientConn.send(motd.encode())
@@ -152,7 +150,7 @@ def handleClient(connInfo):
                                 offlineMessages[tousr] = msglist
                             else:
                                 msglist.append(offlineMessages[tousr])
-                                offlineMesageses[tousr] = msglist
+                                offlineMessages[tousr] = msglist
                         print(offlineMessages)
                             
                     elif '/me' in message:
@@ -160,7 +158,7 @@ def handleClient(connInfo):
                         del msgs[0]
                         me = clientUN
                         msg = " ".join(msgs)
-                        message = "* "+ me + " " + msg
+                        message = "* "+ me + " " + msg + '\n'
                     else:
                         message = clientUN + ': ' + message + '\n'
                     print(message)

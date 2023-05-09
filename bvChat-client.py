@@ -36,6 +36,11 @@ def messageRecvr():
         if message != '':
             print(message)
 
+
+def messageSender():
+    global connected
+    
+
 if confirm == '1':
    #password
    clientSock.send( (input('Password: ') + '\n').encode())
@@ -62,19 +67,20 @@ else:
 try:
     connected = True
     threading.Thread(target=messageRecvr, daemon=True).start()
-    motd = clientSock.recv(1024).decode()
+    motd = getLine(clientSock)
     print("Message of the day:\n"+motd)
     while connected:
         message = input('> ')
         clientSock.send( (message + '\n').encode() )
         if message == '/exit':
+            connected = False
             clientSock.close()
         if message == '/help':
             print("Valid commands: ")
             print(commands)
         #check for messages
-        msg = clientSock.recv(1024).decode()
-        print(msg)
+        #msg = getLine(clientSock)
+    #    print(msg)
 
 except Exception:
     print('Exception happened, closing connection')
