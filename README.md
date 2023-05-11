@@ -1,5 +1,5 @@
 # bvChat
-bvChat is a chat program built in Python. The server supports 15 clients connected at any given time. Each client that logs in will have their usernames and passwords saved even if the the server goes down.
+bvChat is a chat program built in Python. The server supports 15 clients connected at any given time (This could be easily changed if desiered). Each client that logs in will have their usernames and passwords saved even if the the server goes down.
 Client usernames and passwords are stored in plain text in `users.txt`.
 ## Server
 `bvChat-server.py` can be run like a normal python program and will continue to run until a keboard interupt or an unexpected error occurs.
